@@ -195,10 +195,8 @@ LDEXPORT=-rdynamic
 endif
 
 ifndef CONFIG_COSMO
-ifndef CONFIG_DARWIN
 ifndef CONFIG_WIN32
 CONFIG_SHARED_LIBS=y # building shared libraries is supported
-endif
 endif
 endif
 
@@ -230,7 +228,11 @@ PROGS+=examples/hello_module
 endif
 endif
 ifdef CONFIG_SHARED_LIBS
+ifdef CONFIG_DARWIN
+PROGS+=examples/fib.dylib examples/point.dylib
+else
 PROGS+=examples/fib.so examples/point.so
+endif
 endif
 endif
 endif
@@ -412,6 +414,14 @@ examples/fib.so: $(OBJDIR)/examples/fib.pic.o
 
 examples/point.so: $(OBJDIR)/examples/point.pic.o
 	$(CC) $(LDFLAGS) -shared -o $@ $^
+
+examples/fib.dylib: $(OBJDIR)/examples/fib.pic.o
+	$(CC) $(LDFLAGS) -Wl,-undefined,dynamic_lookup -dynamiclib -o $@ $^
+	ln -s fib.dylib examples/fib.so
+
+examples/point.dylib: $(OBJDIR)/examples/point.pic.o
+	$(CC) $(LDFLAGS) -Wl,-undefined,dynamic_lookup -dynamiclib -o $@ $^
+	ln -s point.dylib examples/point.so
 
 ###############################################################################
 # documentation
